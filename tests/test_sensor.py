@@ -39,7 +39,7 @@ async def test_sensors(hass, mock_client):
     last_bill_amount = hass.states.get(prefix + "last_bill_amount")
     assert last_bill_amount is not None
     assert last_bill_amount.state == "32.0"
-    assert len(last_bill_amount.attributes["history"]) == 1
+    assert len(last_bill_amount.attributes["history"]) == 2
 
     last_bill_date = hass.states.get(prefix + "last_bill_date")
     assert last_bill_date is not None
