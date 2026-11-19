@@ -38,7 +38,7 @@ from .const import (
     SERVICE_REFRESH,
     SERVICE_SUBSCRIBE_EBILL,
 )
-from .coordinator import IWKCoordinator
+from .coordinator import IWKConfigEntry, IWKCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ PAY_LINK_TTL = 15 * 60
 _PAY_LINKS = f"{DOMAIN}_pay_links"
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: IWKConfigEntry) -> bool:
     session = async_get_clientsession(hass)
     client = IWKClient(
         username=entry.data[CONF_USERNAME],
@@ -59,7 +59,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = IWKCoordinator(hass, entry, client)
     await coordinator.async_config_entry_first_refresh()
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    entry.runtime_data = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_reload_on_options))
 
@@ -71,22 +71,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if ok:
-        hass.data[DOMAIN].pop(entry.entry_id, None)
-    return ok
+async def async_unload_entry(hass: HomeAssistant, entry: IWKConfigEntry) -> bool:
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
-async def _reload_on_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
+async def _reload_on_options(hass: HomeAssistant, entry: IWKConfigEntry) -> None:
     await hass.config_entries.async_reload(entry.entry_id)
 
 
 def _find(hass: HomeAssistant, san: str) -> IWKCoordinator:
-    for coord in hass.data.get(DOMAIN, {}).values():
-        if coord.data and san in coord.data:
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        coord: IWKCoordinator | None = getattr(entry, "runtime_data", None)
+        if coord and coord.data and san in coord.data:
             return coord
-    raise HomeAssistantError(f"IWK account {san} not found")
+    raise HomeAssistantError(
+        translation_domain=DOMAIN,
+        translation_key="account_not_found",
+        translation_placeholders={"san": san},
+    )
 
 
 def _register_services(hass: HomeAssistant) -> None:
@@ -94,8 +96,10 @@ def _register_services(hass: HomeAssistant) -> None:
         return
 
     async def refresh(call: ServiceCall) -> None:
-        for coord in hass.data.get(DOMAIN, {}).values():
-            await coord.async_request_refresh()
+        for entry in hass.config_entries.async_entries(DOMAIN):
+            coord: IWKCoordinator | None = getattr(entry, "runtime_data", None)
+            if coord:
+                await coord.async_request_refresh()
 
     async def subscribe(call: ServiceCall) -> ServiceResponse:
         san = call.data[ATTR_SAN]
@@ -118,10 +122,16 @@ def _register_services(hass: HomeAssistant) -> None:
         acc = coord.data[san]
         amount = call.data.get(ATTR_AMOUNT) or acc.amount_due or 0
         if amount < 1:
-            raise HomeAssistantError("Nothing to pay (IWK minimum is RM1.00)")
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="min_payment",
+            )
         email = call.data.get("email") or coord.client.profile.get("email")
         if not email:
-            raise HomeAssistantError("An email is required for the receipt")
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="email_required",
+            )
         try:
             res = await coord.client.create_payment(acc, float(amount), email)
         except IWKError as err:
@@ -246,8 +256,9 @@ class IWKBillPdfView(HomeAssistantView):
     async def get(
         self, request: web.Request, entry_id: str, san: str, ref: str
     ) -> web.Response:
-        coordinator: IWKCoordinator | None = self.hass.data.get(DOMAIN, {}).get(
-            entry_id
+        entry = self.hass.config_entries.async_get_entry(entry_id)
+        coordinator: IWKCoordinator | None = (
+            getattr(entry, "runtime_data", None) if entry else None
         )
         acc = coordinator.data.get(san) if coordinator and coordinator.data else None
         row = next(

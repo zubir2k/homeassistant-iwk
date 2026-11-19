@@ -118,5 +118,16 @@
         }
       }
     }
+  },
+  "exceptions": {
+    "account_not_found": {
+      "message": "IWK account {san} not found."
+    },
+    "email_required": {
+      "message": "An email is required for the receipt."
+    },
+    "min_payment": {
+      "message": "Nothing to pay (IWK minimum is RM1.00)."
+    }
   }
 }

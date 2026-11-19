@@ -23,6 +23,8 @@ from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_HOURS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+type IWKConfigEntry = ConfigEntry["IWKCoordinator"]
+
 
 class IWKCoordinator(DataUpdateCoordinator[dict[str, IWKAccount]]):
     """Polls every linked IWK account."""

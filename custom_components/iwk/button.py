@@ -14,16 +14,16 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from iwk import IWKError
 
 from .const import DOMAIN
-from .coordinator import IWKCoordinator
+from .coordinator import IWKConfigEntry, IWKCoordinator
 from .entity import IWKEntity
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: IWKConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    coordinator: IWKCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     entities: list[ButtonEntity] = []
     for san in coordinator.data:
         entities += [

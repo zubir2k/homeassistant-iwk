@@ -26,11 +26,11 @@ async def _setup(hass):
 async def test_setup_and_unload(hass, mock_client):
     """Test full setup and teardown lifecycle."""
     entry = await _setup(hass)
-    assert entry.entry_id in hass.data[DOMAIN]
+    assert entry.runtime_data is not None
 
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
-    assert entry.entry_id not in hass.data[DOMAIN]
+    assert getattr(entry, "runtime_data", None) is None
 
 
 async def test_service_refresh(hass, mock_client):

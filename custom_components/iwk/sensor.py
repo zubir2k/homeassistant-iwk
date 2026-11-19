@@ -20,7 +20,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from iwk import IWKAccount
 
 from .const import DOMAIN
-from .coordinator import IWKCoordinator
+from .coordinator import IWKConfigEntry, IWKCoordinator
 from .entity import IWKEntity
 
 
@@ -129,9 +129,9 @@ SENSORS: tuple[IWKSensorDescription, ...] = (
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: IWKConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    coordinator: IWKCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities(
         IWKSensor(coordinator, san, desc)
         for san in coordinator.data
