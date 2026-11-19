@@ -1,6 +1,9 @@
 {
   "domain": "iwk",
   "name": "IWK (Indah Water)",
+  "categories": [
+    "local_services"
+  ],
   "codeowners": [
     "@zubir2k"
   ],
