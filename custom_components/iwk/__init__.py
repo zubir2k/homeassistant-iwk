@@ -51,10 +51,10 @@ _PAY_LINKS = f"{DOMAIN}_pay_links"
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     session = async_get_clientsession(hass)
     client = IWKClient(
-        session,
-        entry.data[CONF_USERNAME],
-        entry.data[CONF_PASSWORD],
-        entry.data.get(CONF_LANG, DEFAULT_LANG),
+        username=entry.data[CONF_USERNAME],
+        password=entry.data[CONF_PASSWORD],
+        session=session,
+        lang=entry.data.get(CONF_LANG, DEFAULT_LANG),
     )
     coordinator = IWKCoordinator(hass, entry, client)
     await coordinator.async_config_entry_first_refresh()

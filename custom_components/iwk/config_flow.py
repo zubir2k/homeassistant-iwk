@@ -50,10 +50,10 @@ class IWKConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> tuple[dict[str, str], dict[str, Any]]:
         session = async_get_clientsession(self.hass)
         client = IWKClient(
-            session,
-            data[CONF_USERNAME],
-            data[CONF_PASSWORD],
-            data.get(CONF_LANG, DEFAULT_LANG),
+            username=data[CONF_USERNAME],
+            password=data[CONF_PASSWORD],
+            session=session,
+            lang=data.get(CONF_LANG, DEFAULT_LANG),
         )
         try:
             await client.login()

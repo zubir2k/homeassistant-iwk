@@ -87,19 +87,19 @@ def mock_client():
     ):
         for cls in (init_cls, flow_cls):
             client = cls.return_value
-            client.profile = {
+            prof = {
                 "memberid": "12345",
                 "username": "testuser",
                 "email": "test@example.com",
             }
+            client.profile = prof
             client.login = AsyncMock(return_value="mock-token")
-            client.get_profile = AsyncMock(
-                return_value={
-                    "memberid": "12345",
-                    "username": "testuser",
-                    "email": "test@example.com",
-                }
-            )
+
+            def _get_prof(c=client, p=prof):
+                c.profile = p
+                return p
+
+            client.get_profile = AsyncMock(side_effect=_get_prof)
             client.get_accounts = AsyncMock(
                 side_effect=lambda: {TEST_SAN: make_account()}
             )
