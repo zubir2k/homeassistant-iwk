@@ -1,0 +1,42 @@
+refresh:
+
+create_payment_link:
+  fields:
+    san:
+      required: true
+      example: "01234567890"
+      selector:
+        text:
+    amount:
+      required: false
+      example: 30.00
+      selector:
+        number:
+          min: 1
+          max: 10000
+          step: 0.01
+          unit_of_measurement: MYR
+          mode: box
+    email:
+      required: false
+      selector:
+        text:
+          type: email
+
+subscribe_ebill:
+  fields:
+    san:
+      required: true
+      example: "01234567890"
+      selector:
+        text:
+    ownership:
+      required: false
+      selector:
+        select:
+          options: ["Owner", "Tenant", "Others"]
+    channel:
+      required: false
+      default: Email
+      selector:
+        text:

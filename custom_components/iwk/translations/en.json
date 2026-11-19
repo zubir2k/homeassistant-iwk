@@ -1,0 +1,122 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "IWK (Indah Water)",
+        "description": "Sign in with your IWK app / customer portal account.",
+        "data": {
+          "username": "Username or email",
+          "password": "Password",
+          "lang": "Language"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate IWK",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid username or password.",
+      "captcha": "IWK rejected the reCAPTCHA token. Check the logs and try again.",
+      "cannot_connect": "Could not reach IWK."
+    },
+    "abort": {
+      "already_configured": "This IWK account is already configured.",
+      "reauth_successful": "Re-authentication successful."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Update interval (hours)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "amount_due": {
+        "name": "Amount due"
+      },
+      "bill_number": {
+        "name": "Bill number"
+      },
+      "ebill_status": {
+        "name": "eBill status"
+      },
+      "last_bill_amount": {
+        "name": "Last bill amount"
+      },
+      "last_bill_date": {
+        "name": "Last bill date"
+      },
+      "last_payment_amount": {
+        "name": "Last payment amount"
+      },
+      "last_payment_date": {
+        "name": "Last payment date"
+      }
+    },
+    "binary_sensor": {
+      "payment_due": {
+        "name": "Payment due"
+      },
+      "ebill": {
+        "name": "eBill subscribed"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Refresh"
+      },
+      "subscribe_ebill": {
+        "name": "Subscribe to eBill"
+      }
+    }
+  },
+  "services": {
+    "refresh": {
+      "name": "Refresh",
+      "description": "Refresh all IWK accounts now."
+    },
+    "create_payment_link": {
+      "name": "Create payment link",
+      "description": "Create an IWK bill pre-order and a one-time link to the eGHL payment page.",
+      "fields": {
+        "san": {
+          "name": "Sewerage account no.",
+          "description": "11-digit SAN."
+        },
+        "amount": {
+          "name": "Amount",
+          "description": "Defaults to the amount due."
+        },
+        "email": {
+          "name": "Receipt email",
+          "description": "Defaults to your IWK profile email."
+        }
+      }
+    },
+    "subscribe_ebill": {
+      "name": "Subscribe to eBill",
+      "description": "Experimental: subscribe an account to eBill.",
+      "fields": {
+        "san": {
+          "name": "Sewerage account no.",
+          "description": "11-digit SAN."
+        },
+        "ownership": {
+          "name": "Ownership",
+          "description": "Owner, Tenant or Others."
+        },
+        "channel": {
+          "name": "Channel",
+          "description": "eBill channel, usually Email."
+        }
+      }
+    }
+  }
+}

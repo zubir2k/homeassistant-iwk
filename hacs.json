@@ -1,0 +1,8 @@
+{
+  "name": "IWK (Indah Water)",
+  "render_readme": true,
+  "homeassistant": "2024.12.0",
+  "country": "MY",
+  "zip_release": true,
+  "filename": "iwk.zip"
+}

@@ -1,0 +1,23 @@
+{
+  "domain": "iwk",
+  "name": "IWK (Indah Water)",
+  "codeowners": [
+    "@zubir2k"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "http"
+  ],
+  "documentation": "https://github.com/zubir2k/homeassistant-iwk",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/zubir2k/homeassistant-iwk/issues",
+  "loggers": [
+    "iwk"
+  ],
+  "quality_scale": "silver",
+  "requirements": [
+    "python-iwk==0.1.0"
+  ],
+  "version": "0.1.0"
+}

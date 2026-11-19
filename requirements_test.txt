@@ -1,0 +1,2 @@
+pytest-homeassistant-custom-component
+python-iwk==0.1.0
