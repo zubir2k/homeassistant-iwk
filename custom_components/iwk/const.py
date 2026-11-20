@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 DOMAIN = "iwk"
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 API_BASE = "https://customerportal.iwk.com.my/api/{lang}/5"
 RECAPTCHA_SITE_KEY = "6Le7JKUrAAAAABiDWLLeqHj9iLVVxuKmwV1O6IMM"

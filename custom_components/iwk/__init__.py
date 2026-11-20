@@ -4,15 +4,18 @@ from __future__ import annotations
 
 import contextlib
 import html
+import json
 import logging
 import secrets
 import time
+from datetime import timedelta
 from typing import Any
 
 import voluptuous as vol
 from aiohttp import web
 from homeassistant.components import persistent_notification
 from homeassistant.components.http import HomeAssistantView
+from homeassistant.components.http.auth import async_sign_path
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
 from homeassistant.core import (
@@ -140,18 +143,20 @@ def _register_services(hass: HomeAssistant) -> None:
         pay_id = secrets.token_urlsafe(24)
         hass.data[_PAY_LINKS][pay_id] = (time.time() + PAY_LINK_TTL, res.get("data"))
         path = f"/api/{DOMAIN}/pay/{pay_id}"
+        signed_path = async_sign_path(hass, path, timedelta(seconds=PAY_LINK_TTL))
+        url = signed_path
         with contextlib.suppress(NoURLAvailableError):
-            path = get_url(hass, prefer_external=True) + path
+            url = get_url(hass, prefer_external=True) + signed_path
         name = acc.nickname or san
         persistent_notification.async_create(
             hass,
             f"Pay **RM{amount:.2f}** for {name} (bill {acc.bill_no}).\n\n"
-            f"[Open eGHL payment page]({path}) (valid 15 minutes)",
+            f"[Open eGHL payment page]({url}) (valid 15 minutes)",
             title="IWK payment",
             notification_id=f"{DOMAIN}_pay_{san}",
         )
         return {
-            "path": path,
+            "path": url,
             "amount": round(float(amount), 2),
             "bill_no": acc.bill_no,
             "raw": res,
@@ -191,9 +196,7 @@ class IWKPayView(HomeAssistantView):
 
     url = f"/api/{DOMAIN}/pay/{{pay_id}}"
     name = f"api:{DOMAIN}:pay"
-    requires_auth = (
-        False  # opened in a plain browser tab; protected by a random one-time id
-    )
+    requires_auth = True
 
     def __init__(self, hass: HomeAssistant) -> None:
         self.hass = hass
@@ -209,26 +212,26 @@ class IWKPayView(HomeAssistantView):
                 status=404, text="Payment link expired or already used."
             )
         data = item[1]
-        if isinstance(data, str) and "<form" in data.lower():
-            body = data
-        else:
-            if isinstance(data, str):
-                try:
-                    import json
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except ValueError:
+                return web.Response(
+                    status=502, text="Unexpected non-JSON response from IWK payment API."
+                )
+        if not isinstance(data, dict):
+            return web.Response(
+                status=502, text="Unexpected payment payload structure from IWK API."
+            )
 
-                    data = json.loads(data)
-                except ValueError:
-                    return web.Response(
-                        status=502, text=f"Unexpected IWK response: {data[:300]}"
-                    )
-            fields = "".join(
-                f"<input type='hidden' name='{html.escape(str(k))}' value='{html.escape(str(v))}'/>"
-                for k, v in (data or {}).items()
-            )
-            body = (
-                f"<form id='f' method='post' action='{PAYMENT_GATEWAY_URL}'>{fields}"
-                "<noscript><button>Continue to payment</button></noscript></form>"
-            )
+        fields = "".join(
+            f"<input type='hidden' name='{html.escape(str(k))}' value='{html.escape(str(v))}'/>"
+            for k, v in data.items()
+        )
+        body = (
+            f"<form id='f' method='post' action='{PAYMENT_GATEWAY_URL}'>{fields}"
+            "<noscript><button>Continue to payment</button></noscript></form>"
+        )
         page = (
             "<!doctype html><html><head><meta charset='utf-8'><title>IWK payment</title></head>"
             f'<body onload="var f=document.forms[0]; if(f) f.submit();">'

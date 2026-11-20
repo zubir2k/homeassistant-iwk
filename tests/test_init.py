@@ -74,6 +74,7 @@ async def test_service_create_payment_link(hass, mock_client):
     assert response["amount"] == 32.0
     assert response["bill_no"] == "10000000001"
     assert "/api/iwk/pay/" in response["path"]
+    assert "authSig=" in response["path"]
 
 
 async def test_service_create_payment_link_invalid_amount(hass, mock_client):
@@ -101,7 +102,8 @@ async def test_pay_view(hass, mock_client, hass_client):
         blocking=True,
         return_response=True,
     )
-    pay_path = urlparse(response["path"]).path
+    parsed = urlparse(response["path"])
+    pay_path = f"{parsed.path}?{parsed.query}" if parsed.query else parsed.path
 
     resp = await client.get(pay_path)
     assert resp.status == 200
