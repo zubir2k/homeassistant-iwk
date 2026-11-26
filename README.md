@@ -1,6 +1,7 @@
 ![IndahWater](/custom_components/iwk/brand/logo.png)
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/zubir2k/homeassistant-iwk?style=social)](https://github.com/zubir2k/homeassistant-iwk/stargazers)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/default)
 [![hacs_badge](https://img.shields.io/badge/HACS-Integration-41BDF5.svg)](https://github.com/hacs/integration)
 [![Buy](https://img.shields.io/badge/Belanja-Coffee-yellow.svg)](https://zubirco.de/buymecoffee)
 [![GitHub Release](https://img.shields.io/github/release/zubir2k/homeassistant-iwk.svg)](https://github.com/zubir2k/homeassistant-iwk/releases/)
