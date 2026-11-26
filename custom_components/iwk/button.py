@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 
 from homeassistant.components.button import ButtonEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
@@ -13,11 +12,12 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from iwk import IWKError
 
-from .const import DOMAIN
 from .coordinator import IWKConfigEntry, IWKCoordinator
 from .entity import IWKEntity
 
 _LOGGER = logging.getLogger(__name__)
+
+PARALLEL_UPDATES = 0
 
 
 async def async_setup_entry(

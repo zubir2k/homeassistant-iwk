@@ -16,7 +16,6 @@ from aiohttp import web
 from homeassistant.components import persistent_notification
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.components.http.auth import async_sign_path
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
 from homeassistant.core import (
     HomeAssistant,
